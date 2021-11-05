@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="100">
+
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="10"
+        android:text="Date" />
+
+    <ImageView
+        android:id="@+id/iv_weather_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        tools:srcCompat="@tools:sample/avatars"
+        />
+
+    <TextView
+        android:id="@+id/tv_cur_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="128dp"
+        android:layout_weight="20"
+        android:text="temp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="20"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_max_temp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Max: " />
+
+        <TextView
+            android:id="@+id/tv_min_temp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Min: " />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_humidity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="30"
+        android:text="Humidity" />
+</LinearLayout>

@@ -99,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onResponse(List<WeatherReportModel> weatherReportModels) {
-                                ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, weatherReportModels);
+                                //ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, weatherReportModels);
+                                WeatherArrayAdapter arrayAdapter = new WeatherArrayAdapter(MainActivity.this, R.layout.weather_list_view_layout, weatherReportModels);
                                 lv_weatherReports.setAdapter(arrayAdapter);
                             }
                         });

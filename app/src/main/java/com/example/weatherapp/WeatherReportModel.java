@@ -86,7 +86,7 @@ public class WeatherReportModel {
         this.created = created;
     }
 
-    public String getApplicable_date(String applicable_date) {
+    public String getApplicable_date() {
         return applicable_date;
     }
 
