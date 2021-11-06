@@ -1,6 +1,8 @@
 package com.example.weatherapp;
 
 import android.content.Context;
+import android.location.Location;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -18,6 +20,7 @@ import java.util.List;
 public class WeatherDataService {
 
     public static final String QUERY_FOR_CITY_ID = "https://www.metaweather.com/api/location/search/?query=";
+    public static final String QUERY_FOR_CITY_ID_WITH_GEOLOC = "https://www.metaweather.com/api/location/search/?lattlong=";
     public static final String QUERY_FOR_CITY_WEATHER_BY_ID = "https://www.metaweather.com/api/location/";
 
     Context context;
@@ -66,6 +69,39 @@ public class WeatherDataService {
         //return cityID;
     }
 
+
+    public void getCityIDWithGeo(Location location, VolleyResponseListener volleyResponseListener)
+    {
+        // convert location long_lat into String
+        String geolocation = String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
+        Log.d("tag", geolocation);
+        String url = QUERY_FOR_CITY_ID_WITH_GEOLOC + geolocation;
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>(){
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        cityID = "";
+                        try {
+                            JSONObject cityInfo = response.getJSONObject(0);
+                            cityID = cityInfo.getString("woeid");
+                            Log.d("woeid from geo: ", cityID);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        volleyResponseListener.onResponse(cityID);
+                    }
+                }, new Response.ErrorListener(){
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            volleyResponseListener.onError("Error occurred");
+        }
+    });
+        // Add the request to the RequestQueue.
+        MySingleton.getInstance(context).addToRequestQueue(request);
+    }
+
     public interface ForeCastByIDResponse{
         void onError(String message);
 
@@ -75,6 +111,7 @@ public class WeatherDataService {
     public void getCityForecastByID(String cityID, ForeCastByIDResponse foreCastByIDResponse)
     {
         List<WeatherReportModel> weatherReportModels = new ArrayList<>();
+        Log.d("city ID", cityID);
         String url = QUERY_FOR_CITY_WEATHER_BY_ID + cityID;
 
         // get the json object
