@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -15,7 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WeatherDataService {
 
@@ -249,7 +252,9 @@ public class WeatherDataService {
      */
     public void getCityNameByLocation(Location location, GetCityNameByLocationCallback getCityNameByLocationCallback)
     {
-        String url = QUERY_FOR_GEOLOC_WEATHERGOV + location.toString();
+        // convert location long_lat into String
+        String geolocation = String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
+        String url = QUERY_FOR_GEOLOC_WEATHERGOV + geolocation;
 
         // Requests JsonObject from API
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -263,6 +268,7 @@ public class WeatherDataService {
                             JSONObject cityInfo = locationInfo.getJSONObject("relativeLocation").getJSONObject("properties");
                             String cityName = cityInfo.getString("city");
                             String stateName = cityInfo.getString("state");
+                            Log.d("getCityNameByLocation", "city Name: " + cityName);
 
                             // JSONObject provides a url to the forecast. Call jsonObject and get the forecast from this url
                             String forecastURL = locationInfo.getString("forecast");
@@ -273,7 +279,7 @@ public class WeatherDataService {
                                             List<WeatherGovReportModel> forecastReports =  new ArrayList<WeatherGovReportModel>();
                                             try {
                                                 JSONArray forecasts = response.getJSONObject("properties").getJSONArray("periods");
-
+                                                Log.d("getCityNameByLocation", "forecast jsonArray: " + forecasts);
                                                 for(int i=0; i < forecasts.length(); i++)
                                                 {
                                                     WeatherGovReportModel one_day_weather = new WeatherGovReportModel();
@@ -283,7 +289,7 @@ public class WeatherDataService {
                                                     one_day_weather.setName(selected_day_from_api.getString("name"));
                                                     one_day_weather.setStartTime(selected_day_from_api.getString("startTime"));
                                                     one_day_weather.setEndTime(selected_day_from_api.getString("endTime"));
-                                                    one_day_weather.setDaytime(selected_day_from_api.getBoolean("isDayTime"));
+                                                    one_day_weather.setDaytime(selected_day_from_api.getBoolean("isDaytime"));
                                                     one_day_weather.setTemperature(selected_day_from_api.getInt("temperature"));
                                                     one_day_weather.setWindSpeed(selected_day_from_api.getString("windSpeed"));
                                                     one_day_weather.setWindDirection(selected_day_from_api.getString("windDirection"));
@@ -303,7 +309,15 @@ public class WeatherDataService {
                                         public void onErrorResponse(VolleyError error) {
                                             Log.i("onErrorResponse", error.toString());
                                         }
-                                    });
+                                    }){
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError{
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("User-Agent", "MyWeatherApp/v1.0 (https://github.com/leejp1998/WeatherApp; leejp1998@gmail.com)");
+                                    return params;
+                                }
+                            };
+                            MySingleton.getInstance(context).addToRequestQueue(request2);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -314,9 +328,17 @@ public class WeatherDataService {
             public void onErrorResponse(VolleyError error) {
                 Log.i("onErrorResponse", error.toString());
             }
-        });
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError{
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("User-Agent", "MyWeatherApp/v1.0 (https://github.com/leejp1998/WeatherApp; leejp1998@gmail.com)");
+                return params;
+            }
+        };
 
         // Add the request to the RequestQueue.
         MySingleton.getInstance(context).addToRequestQueue(request);
+
     }
 }
