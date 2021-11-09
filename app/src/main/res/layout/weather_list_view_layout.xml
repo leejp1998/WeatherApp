@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="10"
-        android:text="Date" />
+        android:text="Date"/>
 
     <ImageView
         android:id="@+id/iv_weather_icon"
@@ -35,22 +35,23 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_max_temp"
+            android:id="@+id/shortForecast"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Max: " />
+            android:text=""
+            android:ellipsize="end"/>
 
-        <TextView
-            android:id="@+id/tv_min_temp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Min: " />
+<!--        <TextView-->
+<!--            android:id="@+id/tv_min_temp"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Min: " />-->
     </LinearLayout>
 
     <TextView
-        android:id="@+id/tv_humidity"
+        android:id="@+id/tv_windspeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="30"
-        android:text="Humidity" />
+        android:text="Wind Speed" />
 </LinearLayout>

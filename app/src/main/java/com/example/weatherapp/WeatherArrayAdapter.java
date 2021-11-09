@@ -3,7 +3,6 @@ package com.example.weatherapp;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,10 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.w3c.dom.Text;
-
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class WeatherArrayAdapter extends ArrayAdapter<WeatherGovReportModel> {
@@ -55,16 +51,16 @@ public class WeatherArrayAdapter extends ArrayAdapter<WeatherGovReportModel> {
         ImageView ivWeatherIcon = (ImageView) convertView.findViewById(R.id.iv_weather_icon);
         TextView tvDate = (TextView) convertView.findViewById(R.id.tv_date);
         TextView tvTemp = (TextView) convertView.findViewById(R.id.tv_cur_temp);
-        TextView tvMinTemp = (TextView) convertView.findViewById(R.id.tv_min_temp);
-        TextView tvMaxTemp = (TextView) convertView.findViewById(R.id.tv_max_temp);
-        TextView tvHumidity = (TextView) convertView.findViewById(R.id.tv_humidity);
+       // TextView tvMinTemp = (TextView) convertView.findViewById(R.id.tv_min_temp);
+        TextView tvShortForecast = (TextView) convertView.findViewById(R.id.shortForecast);
+        TextView tvWindSpeed = (TextView) convertView.findViewById(R.id.tv_windspeed);
 
         new DownloadImageTask(ivWeatherIcon).execute(icon);
         tvDate.setText(name);
         tvTemp.setText("Temp \n" + String.valueOf(temperature) + "°F");
-        tvMinTemp.setText("Min: " + String.valueOf(temperature) + "°C");
-        tvMaxTemp.setText("Max: " + String.valueOf(temperature) + "°C");
-        tvHumidity.setText("Humidity \n" + String.valueOf(windspeed) + "%");
+       // tvMinTemp.setText("Min: " + String.valueOf(temperature) + "°C");
+        tvShortForecast.setText("Forecast \n " + String.valueOf(shortForecast));
+        tvWindSpeed.setText("Humidity \n" + String.valueOf(windspeed));
 
 //        String applicable_date = getItem(position).getApplicable_date().substring(5);
 //        String weather_state_abbr = getItem(position).getWeather_state_abbr(); // use weather state abbr to find the icon
@@ -81,14 +77,14 @@ public class WeatherArrayAdapter extends ArrayAdapter<WeatherGovReportModel> {
 //        TextView tvDate = (TextView) convertView.findViewById(R.id.tv_date);
 //        TextView tvTemp = (TextView) convertView.findViewById(R.id.tv_cur_temp);
 //        TextView tvMinTemp = (TextView) convertView.findViewById(R.id.tv_min_temp);
-//        TextView tvMaxTemp = (TextView) convertView.findViewById(R.id.tv_max_temp);
+//        TextView tvShortForecast = (TextView) convertView.findViewById(R.id.tv_max_temp);
 //        TextView tvHumidity = (TextView) convertView.findViewById(R.id.tv_humidity);
 //
 //        ivWeatherIcon.setImageResource(weatherIcon_id);
 //        tvDate.setText(applicable_date);
 //        tvTemp.setText("Temp \n" + String.valueOf(temp) + "°C");
 //        tvMinTemp.setText("Min: " + String.valueOf(min_temp) + "°C");
-//        tvMaxTemp.setText("Max: " + String.valueOf(max_temp) + "°C");
+//        tvShortForecast.setText("Max: " + String.valueOf(max_temp) + "°C");
 //        tvHumidity.setText("Humidity \n" + String.valueOf(humidity) + "%");
 
         return convertView;
