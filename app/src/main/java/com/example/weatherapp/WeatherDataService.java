@@ -23,6 +23,9 @@ public class WeatherDataService {
     public static final String QUERY_FOR_CITY_ID_WITH_GEOLOC = "https://www.metaweather.com/api/location/search/?lattlong=";
     public static final String QUERY_FOR_CITY_WEATHER_BY_ID = "https://www.metaweather.com/api/location/";
 
+    // Using weathergov API
+    public static final String QUERY_FOR_GEOLOC_WEATHERGOV = "https://api.weather.gov/points/"; // {latitude, longitude}
+
     Context context;
     String cityID;
     public WeatherDataService(Context context) {
@@ -197,5 +200,123 @@ public class WeatherDataService {
             }
         });
         // fetch the city forecast given the city id
+    }
+
+    public interface GetCityForecastByLocationCallback{
+        void onError(String message);
+        void onResponse(List<WeatherReportModel> weatherReportModels);
+    }
+
+    /*
+        Using WeatherGov API, get weather forecast of the geolocation
+        In: Location, GetCityForecastByLocationCallback
+        Out: ArrayList<WeatherReportModel>
+     */
+    public void getCityForecastByLocation(Location location, GetCityForecastByLocationCallback getCityForecastByLocationCallback)
+    {
+        String url = QUERY_FOR_GEOLOC_WEATHERGOV + location.toString();
+        List<WeatherReportModel> weatherReportModels = new ArrayList<>();
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>(){
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            JSONArray forecast = response.getJSONArray(0);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        getCityForecastByLocationCallback.onResponse(weatherReportModels);
+                    }
+                }, new Response.ErrorListener(){
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                getCityForecastByLocationCallback.onError("Error occurred");
+            }
+        });
+    }
+
+    public interface GetCityNameByLocationCallback{
+        void onError(String message);
+        void onResponse(String cityName, String stateName, List<WeatherGovReportModel> forecastReports);
+    }
+
+    /*
+        Using WeatherGov API, get weather forecast of the geolocation
+        In: Location, GetCityForecastByLocationCallback
+        Out: ArrayList<WeatherReportModel>
+     */
+    public void getCityNameByLocation(Location location, GetCityNameByLocationCallback getCityNameByLocationCallback)
+    {
+        String url = QUERY_FOR_GEOLOC_WEATHERGOV + location.toString();
+
+        // Requests JsonObject from API
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>(){
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONObject locationInfo = response.getJSONObject("properties");
+
+                            // Retrieve cityName and stateName from the JsonObject
+                            JSONObject cityInfo = locationInfo.getJSONObject("relativeLocation").getJSONObject("properties");
+                            String cityName = cityInfo.getString("city");
+                            String stateName = cityInfo.getString("state");
+
+                            // JSONObject provides a url to the forecast. Call jsonObject and get the forecast from this url
+                            String forecastURL = locationInfo.getString("forecast");
+                            JsonObjectRequest request2 = new JsonObjectRequest(Request.Method.GET, forecastURL, null,
+                                    new Response.Listener<JSONObject>(){
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            List<WeatherGovReportModel> forecastReports =  new ArrayList<WeatherGovReportModel>();
+                                            try {
+                                                JSONArray forecasts = response.getJSONObject("properties").getJSONArray("periods");
+
+                                                for(int i=0; i < forecasts.length(); i++)
+                                                {
+                                                    WeatherGovReportModel one_day_weather = new WeatherGovReportModel();
+                                                    JSONObject selected_day_from_api = (JSONObject) forecasts.get(i);
+
+                                                    one_day_weather.setNumber(selected_day_from_api.getInt("number"));
+                                                    one_day_weather.setName(selected_day_from_api.getString("name"));
+                                                    one_day_weather.setStartTime(selected_day_from_api.getString("startTime"));
+                                                    one_day_weather.setEndTime(selected_day_from_api.getString("endTime"));
+                                                    one_day_weather.setDaytime(selected_day_from_api.getBoolean("isDayTime"));
+                                                    one_day_weather.setTemperature(selected_day_from_api.getInt("temperature"));
+                                                    one_day_weather.setWindSpeed(selected_day_from_api.getString("windSpeed"));
+                                                    one_day_weather.setWindDirection(selected_day_from_api.getString("windDirection"));
+                                                    one_day_weather.setIcon(selected_day_from_api.getString("icon"));
+                                                    one_day_weather.setShortForecast(selected_day_from_api.getString("shortForecast"));
+                                                    one_day_weather.setDetailedForecast(selected_day_from_api.getString("detailedForecast"));
+                                                    forecastReports.add(one_day_weather);
+                                                }
+
+                                                getCityNameByLocationCallback.onResponse(cityName, stateName, forecastReports);
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }, new Response.ErrorListener(){
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            Log.i("onErrorResponse", error.toString());
+                                        }
+                                    });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener(){
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                getCityNameByLocationCallback.onError("Error occurred");
+            }
+        });
+
+        // Add the request to the RequestQueue.
+        MySingleton.getInstance(context).addToRequestQueue(request);
     }
 }
