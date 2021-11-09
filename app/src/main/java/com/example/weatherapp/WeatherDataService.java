@@ -312,7 +312,7 @@ public class WeatherDataService {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                getCityNameByLocationCallback.onError("Error occurred");
+                Log.i("onErrorResponse", error.toString());
             }
         });
 

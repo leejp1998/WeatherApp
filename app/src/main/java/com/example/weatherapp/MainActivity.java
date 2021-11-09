@@ -41,7 +41,8 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btn_getCityID, btn_getWeatherByName;
+    Button btn_getForeCastByLocation, btn_getWeatherByName;
+    TextView tv_cityName;
     EditText et_dataInput;
     ListView lv_weatherReports;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -53,8 +54,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         // assign values to each control on the layout
-        btn_getCityID = findViewById(R.id.btn_getCityID);
+        btn_getForeCastByLocation = findViewById(R.id.btn_getCityID);
         btn_getWeatherByName = findViewById(R.id.btn_getWeatherByCityName);
+        tv_cityName = findViewById(R.id.tv_cityName);
         et_dataInput = findViewById(R.id.et_dataInput);
         lv_weatherReports = findViewById(R.id.lv_weatherReports);
 
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         final WeatherDataService weatherDataService = new WeatherDataService(MainActivity.this);
 
         // button click will check the geolocation of the device, then find the closest city ID
-        btn_getCityID.setOnClickListener(new View.OnClickListener() {
+        btn_getForeCastByLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                // Check permission of location first
@@ -100,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(List<WeatherReportModel> weatherReportModels) {
                                 //ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, weatherReportModels);
-                                WeatherArrayAdapter arrayAdapter = new WeatherArrayAdapter(MainActivity.this, R.layout.weather_list_view_layout, weatherReportModels);
-                                lv_weatherReports.setAdapter(arrayAdapter);
+                                //WeatherArrayAdapter arrayAdapter = new WeatherArrayAdapter(MainActivity.this, R.layout.weather_list_view_layout, weatherReportModels);
+                                //lv_weatherReports.setAdapter(arrayAdapter);
                             }
                         });
                     }
@@ -118,32 +120,36 @@ public class MainActivity extends AppCompatActivity {
                 Location location = task.getResult();
                 if(location != null){
                     // Use long and lat of location to API
-                    weatherDataService.getCityIDWithGeo(location, new WeatherDataService.VolleyResponseListener() {
+                    weatherDataService.getCityNameByLocation(location, new WeatherDataService.GetCityNameByLocationCallback()
+                    {
                         @Override
                         public void onError(String message) {
-                            Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+
                         }
 
                         @Override
-                        public void onResponse(String cityID) {
-                            weatherDataService.getCityForecastByID(cityID, new WeatherDataService.ForeCastByIDResponse() {
-                                @Override
-                                public void onError(String message) {
+                        public void onResponse(String cityName, String stateName, List<WeatherGovReportModel> forecastReports) {
+                            tv_cityName.setText(cityName + ", " + stateName);
 
-                                }
-
-                                @Override
-                                public void onResponse(List<WeatherReportModel> weatherReportModels) {
-                                    //ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, weatherReportModels);
-                                    WeatherArrayAdapter arrayAdapter = new WeatherArrayAdapter(MainActivity.this, R.layout.weather_list_view_layout, weatherReportModels);
-                                    lv_weatherReports.setAdapter(arrayAdapter);
-                                }
-                            });
+                            WeatherArrayAdapter arrayAdapter = new WeatherArrayAdapter(MainActivity.this, R.layout.weather_list_view_layout, forecastReports);
+                            lv_weatherReports.setAdapter(arrayAdapter);
                         }
                     });
+//                            weatherDataService.getCityForecastByID(cityID, new WeatherDataService.ForeCastByIDResponse() {
+//                                @Override
+//                                public void onError(String message) {
+//
+//                                }
+//
+//                                @Override
+//                                public void onResponse(List<WeatherReportModel> weatherReportModels) {
+//                                    //ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, weatherReportModels);
+//                                    WeatherArrayAdapter arrayAdapter = new WeatherArrayAdapter(MainActivity.this, R.layout.weather_list_view_layout, weatherReportModels);
+//                                    lv_weatherReports.setAdapter(arrayAdapter);
+//                                }
+//                            });
                 }
             }
         });
     }
-
 }

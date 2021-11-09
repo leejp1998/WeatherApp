@@ -1,7 +1,11 @@
 package com.example.weatherapp;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +18,16 @@ import androidx.annotation.Nullable;
 
 import org.w3c.dom.Text;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeatherArrayAdapter extends ArrayAdapter<WeatherReportModel> {
+public class WeatherArrayAdapter extends ArrayAdapter<WeatherGovReportModel> {
     private static final String TAG = "WeatherArrayAdapter";
     private Context mContext;
     int mResource;
 
-    public WeatherArrayAdapter(Context context, int resource, List<WeatherReportModel> objects){
+    public WeatherArrayAdapter(Context context, int resource, List<WeatherGovReportModel> objects){
         super(context, resource, objects);
         mContext = context;
         mResource = resource;
@@ -31,15 +36,18 @@ public class WeatherArrayAdapter extends ArrayAdapter<WeatherReportModel> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        int weatherIcon_id;
+        int number = getItem(position).getNumber();
+        String name = getItem(position).getName();
+        String startTime = getItem(position).getStartTime();
+        String endTime = getItem(position).getEndTime();
+        boolean isDaytime = getItem(position).isDaytime();
+        int temperature = getItem(position).getTemperature();
+        String windspeed = getItem(position).getWindSpeed();
+        String icon = getItem(position).getIcon();
+        String shortForecast = getItem(position).getShortForecast();
+        String detailedForecast = getItem(position).getDetailedForecast();
 
-        String applicable_date = getItem(position).getApplicable_date().substring(5);
-        String weather_state_abbr = getItem(position).getWeather_state_abbr(); // use weather state abbr to find the icon
-        weatherIcon_id = getWeatherIcon(weather_state_abbr);
-        float temp = getItem(position).getThe_temp();
-        float min_temp = getItem(position).getMin_temp();
-        float max_temp = getItem(position).getMax_temp();
-        int humidity = getItem(position).getHumidity();
+
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         convertView = inflater.inflate(mResource, parent, false);
@@ -51,12 +59,37 @@ public class WeatherArrayAdapter extends ArrayAdapter<WeatherReportModel> {
         TextView tvMaxTemp = (TextView) convertView.findViewById(R.id.tv_max_temp);
         TextView tvHumidity = (TextView) convertView.findViewById(R.id.tv_humidity);
 
-        ivWeatherIcon.setImageResource(weatherIcon_id);
-        tvDate.setText(applicable_date);
-        tvTemp.setText("Temp \n" + String.valueOf(temp) + "°C");
-        tvMinTemp.setText("Min: " + String.valueOf(min_temp) + "°C");
-        tvMaxTemp.setText("Max: " + String.valueOf(max_temp) + "°C");
-        tvHumidity.setText("Humidity \n" + String.valueOf(humidity) + "%");
+        new DownloadImageTask(ivWeatherIcon).execute(icon);
+        tvDate.setText(name);
+        tvTemp.setText("Temp \n" + String.valueOf(temperature) + "°F");
+        tvMinTemp.setText("Min: " + String.valueOf(temperature) + "°C");
+        tvMaxTemp.setText("Max: " + String.valueOf(temperature) + "°C");
+        tvHumidity.setText("Humidity \n" + String.valueOf(windspeed) + "%");
+
+//        String applicable_date = getItem(position).getApplicable_date().substring(5);
+//        String weather_state_abbr = getItem(position).getWeather_state_abbr(); // use weather state abbr to find the icon
+//        weatherIcon_id = getWeatherIcon(weather_state_abbr);
+//        float temp = getItem(position).getThe_temp();
+//        float min_temp = getItem(position).getMin_temp();
+//        float max_temp = getItem(position).getMax_temp();
+//        int humidity = getItem(position).getHumidity();
+//
+//        LayoutInflater inflater = LayoutInflater.from(mContext);
+//        convertView = inflater.inflate(mResource, parent, false);
+//
+//        ImageView ivWeatherIcon = (ImageView) convertView.findViewById(R.id.iv_weather_icon);
+//        TextView tvDate = (TextView) convertView.findViewById(R.id.tv_date);
+//        TextView tvTemp = (TextView) convertView.findViewById(R.id.tv_cur_temp);
+//        TextView tvMinTemp = (TextView) convertView.findViewById(R.id.tv_min_temp);
+//        TextView tvMaxTemp = (TextView) convertView.findViewById(R.id.tv_max_temp);
+//        TextView tvHumidity = (TextView) convertView.findViewById(R.id.tv_humidity);
+//
+//        ivWeatherIcon.setImageResource(weatherIcon_id);
+//        tvDate.setText(applicable_date);
+//        tvTemp.setText("Temp \n" + String.valueOf(temp) + "°C");
+//        tvMinTemp.setText("Min: " + String.valueOf(min_temp) + "°C");
+//        tvMaxTemp.setText("Max: " + String.valueOf(max_temp) + "°C");
+//        tvHumidity.setText("Humidity \n" + String.valueOf(humidity) + "%");
 
         return convertView;
     }
@@ -91,5 +124,30 @@ public class WeatherArrayAdapter extends ArrayAdapter<WeatherReportModel> {
         }
 
         return icon;
+    }
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.i("DownloadError", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
     }
 }
